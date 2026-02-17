@@ -1,0 +1,36 @@
+# Bundler
+/.bundle
+/vendor/bundle
+
+# Rails
+/log/*
+!/log/.keep
+/tmp/*
+!/tmp/.keep
+!/tmp/pids
+/tmp/pids/*
+!/tmp/pids/.keep
+/storage/*
+!/storage/.keep
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+/config/master.key
+/config/credentials/*.key
+
+# Kubernetes secrets with real values (keep templates)
+k8s/secrets.yaml.local
+
+# macOS
+.DS_Store
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test artifacts
+/coverage
