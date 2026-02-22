@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecp
+  namespace: ecp
+  labels:
+    app: ecp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ecp
+  template:
+    metadata:
+      labels:
+        app: ecp
+    spec:
+      initContainers:
+        # Run DB migrations before starting the app
+        - name: migrate
+          image: ghcr.io/YOUR_ORG/ecp:latest
+          command: ["bundle", "exec", "rails", "db:migrate"]
+          envFrom:
+            - configMapRef:
+                name: ecp-config
+            - secretRef:
+                name: ecp-secrets
+
+      containers:
+        - name: ecp
+          image: ghcr.io/YOUR_ORG/ecp:latest
+          ports:
+            - containerPort: 3000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: ecp-config
+            - secretRef:
+                name: ecp-secrets
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          livenessProbe:
+            httpGet:
+              path: /up
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /up
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
